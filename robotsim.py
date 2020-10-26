@@ -38,7 +38,7 @@ crashed = False
 reset = False
 start = True
 
-with open('resources/map.json') as json_file:
+with open('resources/default.json') as json_file:
     map_info = json.load(json_file)
 
 
@@ -105,7 +105,7 @@ class Robot:
             self.movements += 1
             print('Rotating right, total movements:', self.movements)
             self.dir = (self.dir - 1 + 4) % 4
-            self.set_position(self.x,self.y,self.w - 90)
+            self.set_position(self.x,self.y,(self.w - 90)%360)
 
     def rotate_left(self):
         if self.movements >= 300 and not self.broken:
@@ -115,7 +115,7 @@ class Robot:
             self.movements += 1
             print('Rotating left, total movements:', self.movements)
             self.dir = (self.dir + 1) % 4
-            self.set_position(self.x,self.y,self.w + 90)
+            self.set_position(self.x,self.y,(self.w + 90)%360)
 
     def ultrasonicFront(self):
         return self.__getDistance(0)
