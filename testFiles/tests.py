@@ -6,16 +6,6 @@ Control:
 
 Sensors:    
     robot.ultrasonicFront() -> int
-    robot.ultrasonicRight() -> int
-    robot.ultrasonicLeft() -> int
-    robot.detectFireFront() -> bool
-    robot.scanEnvironment() -> string ("fire", "people", "collapse", "clear", "safe")
-
-Actions: 
-    robot.putOutFireFront()
-    robot.sendMessageExplorationBase(Coord)
-    robot.sendMessageRescueBase(Coord, path)
-    robot.finishExploration()
 '''
 
 def main():

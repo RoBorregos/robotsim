@@ -88,47 +88,24 @@ class Robot:
         #   1 -> West
         #   2 -> South
         #   3 -> East
-        if self.movements >= 300:
-            self.broken = True
-            myfont = pygame.font.SysFont('Arial', 18)
-            textsurface = myfont.render('Out of movements', False, (0, 0, 0))
-            gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
-        if not self.broken:
-            self.movements += 1
-            if self.ultrasonicFront():
-                if self.dir == 0:
-                    self.row -= 1
-                if self.dir == 1:
-                    self.col -= 1
-                if self.dir == 2:
-                    self.row += 1
-                if self.dir == 3:
-                    self.col += 1
-                for _ in range(pixel_constant):
-                    angle = self.w
-                    x1 = self.x 
-                    y1 = self.y 
-                    rad = math.radians(angle)
-                    x2 = round(math.cos(rad)) + x1
-                    y2 = y1 - round(math.sin(rad))
-                    generate_map()
-                    self.set_position(x2,y2,angle)
-                if map.tiles[self.row][self.col].envType == "fire":
-                    #finish
-                    self.broken = True
-                    gameDisplay.fill(white)
-                    myfont = pygame.font.SysFont('Arial', 12)
-                    textsurface = myfont.render("Robot eliminated by fire!", False, (0, 0, 0))
-                    gameDisplay.blit(textsurface,(display_width/2-pixel_constant*1.2,0))
-                if map.tiles[self.row][self.col].envType == "collapse":
-                    if map.tiles[self.row][self.col].envData:
-                        #finish
-                        self.broken = True
-                        gameDisplay.fill(white)
-                        myfont = pygame.font.SysFont('Arial', 12)
-                        textsurface = myfont.render("Robot stuck in collapsed zone!", False, (0, 0, 0))
-                        gameDisplay.blit(textsurface,(display_width/2-pixel_constant*1.2,0))
-                    map.tiles[self.row][self.col].envData = 1
+        if self.ultrasonicFront():
+            if self.dir == 0:
+                self.row -= 1
+            if self.dir == 1:
+                self.col -= 1
+            if self.dir == 2:
+                self.row += 1
+            if self.dir == 3:
+                self.col += 1
+            for _ in range(pixel_constant):
+                angle = self.w
+                x1 = self.x 
+                y1 = self.y 
+                rad = math.radians(angle)
+                x2 = round(math.cos(rad)) + x1
+                y2 = y1 - round(math.sin(rad))
+                generate_map()
+                self.set_position(x2,y2,angle)
     
     def rotate_right(self):
         if self.movements >= 300:
@@ -157,15 +134,9 @@ class Robot:
                 self.set_position(self.x,self.y,self.w + 3)
 
     def ultrasonicFront(self):
-        return self.__getDistance(0)
+        return self.__getDistance()
 
-    def ultrasonicRight(self):
-        return self.__getDistance(1)
-
-    def ultrasonicLeft(self):
-        return self.__getDistance(2)
-
-    def __getDistance(self, dir_ultrasonic):
+    def __getDistance(self):
         # dir:
         #   Front: 0
         #   Right: 1
@@ -175,13 +146,11 @@ class Robot:
         #   1 -> West
         #   2 -> South
         #   3 -> East
-        dirs = [[0, 1, 2, 3],
-                [3, 0, 1, 2],
-                [1, 2, 3, 0]]
+        dirs = [0, 1, 2, 3]
 
         distance = None
         start = 0
-        distance_direction = dirs[dir_ultrasonic][self.dir]
+        distance_direction = dirs[self.dir]
 
         if distance_direction == 0:
             # row-- until 0
@@ -226,95 +195,6 @@ class Robot:
         clock.tick(120)
         return distance
 
-    def scanEnvironment(self):
-        return map.tiles[self.row][self.col].envType
-
-    def detectFireFront(self):
-        # Map dir:
-        #   0 -> North
-        #   1 -> West
-        #   2 -> South
-        #   3 -> East
-        row_directions = [-1, 0, 1, 0]
-        col_directions = [0, -1, 0, 1]
-        row = self.row + row_directions[self.dir]
-        col = self.col + col_directions[self.dir]
-        if not map.is_valid_coordinate(row, col):
-                return False
-        return map.tiles[row][col].envType == "fire"
-
-    def  putOutFireFront(self):
-        if self.detectFireFront():
-            # Map dir:
-            #   0 -> North
-            #   1 -> West
-            #   2 -> South
-            #   3 -> East
-            row_directions = [-1, 0, 1, 0]
-            col_directions = [0, -1, 0, 1]
-            row = self.row + row_directions[self.dir]
-            col = self.col + col_directions[self.dir]
-            if not map.is_valid_coordinate(row, col):
-                return
-            map.tiles[row][col].color = "white"
-            map.tiles[row][col].envType = "clear"
-            generate_map()
-            self.points += 10
-        
-    def sendMessageRescueBase(self, coordinate, path = None):
-        row = coordinate.y
-        col = coordinate.x
-        if map.is_valid_coordinate(row, col) and map.tiles[row][col].envType == "people":
-            map.tiles[row][col].envType = "clear"
-            map.tiles[row][col].color = "white"
-            generate_map()
-            self.points += 5
-            if path:
-                if self.__verifyPath(path):
-                    self.points += 20
-                    print("Valid path")
-                else:
-                    print("Invalid path")
-                    self.points -= 20
-            return True
-        self.points -= 10
-        return False
-
-    def sendMessageExplorationBase(self, coordinate):
-        row = coordinate.y
-        col = coordinate.x
-        if map.is_valid_coordinate(row, col) and map.tiles[row][col].envType == "collapse":
-            self.points += 5
-            return True
-        self.points -= 10
-        return False
-
-    def __verifyPath(self,path): # path : ['N', 'S', 'E', 'W'...]
-        direction_deltas = {'W': (-1,0), 'E': (1,0), 'N': (0,-1), 'S': (0,1)}
-        row = self.row
-        col = self.col
-        for direction in path:
-            row += direction_deltas[direction][1]
-            col += direction_deltas[direction][0]
-            if not map.is_valid_coordinate(row, col):
-                return False
-            if map.tiles[row][col].envType == "collapse":
-                return False
-            if map.tiles[row][col].envType == "fire":
-                return False
-        if map.tiles[row][col].envType == "safe":
-            return True
-        return False
-
-    def finishExploration(self):
-        self.broken = True
-        if self.col + self.row == 0:
-            print("El robot regresó a la base con éxito.")
-            self.points+=20
-        myfont = pygame.font.SysFont('Arial', 18)
-        textsurface = myfont.render('Mission finished!', False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
-
     def __debugTile(self):
         print("(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)")
         print("Position:", self.row, self.col,)
@@ -343,18 +223,10 @@ class Robot:
     
 
 def generate_map():
-    global rosa_de_los_vientos
     gameDisplay.fill(white)
 
     for row in range(map.height):
         for col in range(map.width):
-            #Tile color
-            if map.tiles[row][col].color:
-                x = col * pixel_constant
-                y = row * pixel_constant
-                c = colors[map.tiles[row][col].color]
-                pygame.draw.rect(gameDisplay,c,(x,y,pixel_constant,pixel_constant))
-
             #Tile walls in North, South, East and West order
             x1 = [0, 0, 1, 0]
             y1 = [0, 1, 0, 0]
@@ -372,30 +244,7 @@ def generate_map():
                     y1_pixel = (row + y1[wall_order]) * pixel_constant + shift_y[wall_order] * pixel_constant * 0.02
                     y2_pixel = (row + y2[wall_order]) * pixel_constant + shift_y[wall_order] * pixel_constant * 0.02
                     color = "black"
-                    # if isinstance(color, list):
-                    #     direction_data = getattr(getattr(map.tiles[row][col], dir[wall_order]),"data")
-                    #     if direction_data is None:
-                    #         color = color[-1]
-                    #     else:
-                    #         color = color[int(direction_data)]
                     pygame.draw.line(gameDisplay, colors[color], (x1_pixel, y1_pixel), (x2_pixel, y2_pixel),5)
-    
-    rosa_de_los_vientos = pygame.transform.scale(rosa_de_los_vientos, (int(pixel_constant*2), int(pixel_constant*2)))
-    gameDisplay.blit(rosa_de_los_vientos, (pixel_constant*8 + pixel_constant*0.2, pixel_constant))
-        
-    if robot:
-        myfont = pygame.font.SysFont('Arial', 12)
-        textsurface = myfont.render('Movements = ' + str(robot.movements), False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*0.2))
-        textsurface = myfont.render('Points = ' + str(robot.points), False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, 0.4*pixel_constant))
-        
-    else:
-        myfont = pygame.font.SysFont('Arial', 12)
-        textsurface = myfont.render('Movements = 0', False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*0.2))
-        textsurface = myfont.render('Points = 0', False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, 0.4*pixel_constant))
 
 
 def setup_map():
@@ -409,18 +258,14 @@ def setup_map():
     display_width = map_info['size']['w'] * pixel_constant
     display_height = map_info['size']['h'] * pixel_constant
 
-    gameDisplay = pygame.display.set_mode((display_width + int(pixel_constant*2.5), display_height))
+    gameDisplay = pygame.display.set_mode((display_width, display_height))
 
     #Map initialization
     map = Map(map_info['size']['w'],map_info['size']['h'])
     dir = ["North","South","East","West"]
     dir_reflection = ["South","North","West","East"]
     dir_reflection_xy = [(-1,0),(1,0),(0,1),(0,-1)]
-    #fire", "people", "collapse", "clear", "safe"
-    env_colors = {"pink":"collapse", "yellow":"fire", "white":"clear", "cyan":"safe", "red":"people"}
     for tile in map_info['tiles']:
-        map.tiles[tile['row']][tile['col']].color = tile['color']
-        map.tiles[tile['row']][tile['col']].envType = env_colors[tile['color']]
         for dir_index in range(len(dir)):
             if getattr(getattr(map.tiles[tile['row']][tile['col']], dir[dir_index]), "status") == 0:
                 setattr(getattr(map.tiles[tile['row']][tile['col']], dir[dir_index]), "status", tile['directions'][dir_index])
@@ -467,7 +312,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     while not crashed:
         if start:
             setup_map()

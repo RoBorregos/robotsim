@@ -16,8 +16,6 @@ class Tile:
         self.South = Direction()
         self.East = Direction()
         self.West = Direction()
-        self.envType = "clear" # "fire", "people", "collapse", "clear", "safe"
-        self.envData = 0
 
 class Map:
     def __init__(self, width, height):
