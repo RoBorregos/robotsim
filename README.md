@@ -1,7 +1,5 @@
 Última actualización: 24/10/2020
 
-#
-
 ![](resources/logo.png)
 
 ##

@@ -3,6 +3,7 @@ import json
 import math
 from modules.coord import Coord
 from modules.map import Map
+import sys
 
 pixel_constant = 50
 display_width = 0
@@ -88,7 +89,7 @@ class Robot:
         #   1 -> West
         #   2 -> South
         #   3 -> East
-        if self.ultrasonicFront():
+        if self.distanciaFrente():
             if self.dir == 0:
                 self.row -= 1
             if self.dir == 1:
@@ -104,6 +105,31 @@ class Robot:
                 rad = math.radians(angle)
                 x2 = round(math.cos(rad)) + x1
                 y2 = y1 - round(math.sin(rad))
+                generate_map()
+                self.set_position(x2,y2,angle)
+
+    def move_backward(self):
+        # Map dir:
+        #   0 -> North
+        #   1 -> West
+        #   2 -> South
+        #   3 -> East
+        if self.distanciaAtras():
+            if self.dir == 0:
+                self.row += 1
+            if self.dir == 1:
+                self.col += 1
+            if self.dir == 2:
+                self.row -= 1
+            if self.dir == 3:
+                self.col -= 1
+            for _ in range(pixel_constant):
+                angle = self.w
+                x1 = self.x 
+                y1 = self.y 
+                rad = math.radians(angle)
+                x2 = x1 - round(math.cos(rad))
+                y2 = y1 + round(math.sin(rad))
                 generate_map()
                 self.set_position(x2,y2,angle)
     
@@ -133,10 +159,39 @@ class Robot:
                 generate_map()
                 self.set_position(self.x,self.y,self.w + 3)
 
-    def ultrasonicFront(self):
-        return self.__getDistance()
+    def distanciaFrente(self):
+        return self.__getDistance(0)
 
-    def __getDistance(self):
+    def distanciaAtras(self):
+        return self.__getDistance(1)
+
+    def izqAdelante(self, value):
+        self.izqFront = bool(value)
+
+    def izqAtras(self, value):
+        self.izqBack = bool(value)
+
+    def derAdelante(self, value):
+        self.derFront = bool(value)
+
+    def derAtras(self, value):
+        self.derBack = bool(value)
+
+    # pins: [left_front, left_back, right_front, right_back]
+    def prenderMotor(self):
+        # move forward
+        power_pins = [self.izqFront, self.izqBack, self.derFront, self.derBack]
+        if power_pins == [True,False,True,False]:
+            self.move_forward()
+        elif power_pins == [False,True,False,True]:
+            self.move_backward()
+        elif power_pins == [True,False,False,True]:
+            self.rotate_right()
+        elif power_pins == [False,True,True,False]:
+            self.rotate_left()
+
+
+    def __getDistance(self, val):
         # dir:
         #   Front: 0
         #   Right: 1
@@ -146,11 +201,12 @@ class Robot:
         #   1 -> West
         #   2 -> South
         #   3 -> East
-        dirs = [0, 1, 2, 3]
+        dirs = [[0, 1, 2, 3],
+                [2, 3, 0, 1]]
 
         distance = None
         start = 0
-        distance_direction = dirs[self.dir]
+        distance_direction = dirs[val][self.dir]
 
         if distance_direction == 0:
             # row-- until 0
@@ -183,7 +239,7 @@ class Robot:
                 return -1
 
         if distance_direction == 3:
-            # col++ until 0
+            # col++ until max
             for pos in range(self.col, map.width):
                 if map.tiles[self.row][pos].East.status == 1:
                     distance = start
@@ -204,7 +260,7 @@ class Robot:
         print("South: ", map.tiles[self.row][self.col].South.status)
         print("East: ", map.tiles[self.row][self.col].East.status)
         print("West: ", map.tiles[self.row][self.col].West.status)
-        print("Front", self.ultrasonicFront())
+        print("Front", self.distanciaFrente())
         print("Left", self.ultrasonicLeft())
         print("Right", self.ultrasonicRight())
         print("(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)")
