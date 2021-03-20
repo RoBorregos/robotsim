@@ -41,10 +41,15 @@ def main():
         robot.prenderMotor()
 
     while(True):
-        if(robot.distanciaFrente()):
+        girarDer()
+        if(robot.distanciaFrente() > 0):
             moverAdelante()
         else:
-            girarDer()
+            girarIzq()
+            if(robot.distanciaFrente() > 0):
+                moverAdelante()
+            else:
+                girarIzq()
     
 
 if __name__ == "__main__":

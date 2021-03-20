@@ -38,7 +38,6 @@ map = None
 pygame.init()
 robotImg = pygame.image.load('images/robot.png')
 run_button = pygame.image.load('images/run.png')
-rosa_de_los_vientos = pygame.image.load('images/direcciones.png')
 pygame.display.set_caption('Robot simulator')
 clock = pygame.time.Clock()
 
@@ -53,7 +52,6 @@ with open('resources/map.json') as json_file:
 class Robot:
     def __init__(self,x,y,w,size,col,row,dir):
         self.dir = dir
-        self.movements = 0
         self.points = 0
         self.x = x
         self.y = y
@@ -134,30 +132,16 @@ class Robot:
                 self.set_position(x2,y2,angle)
     
     def rotate_right(self):
-        if self.movements >= 300:
-            self.broken = True
-            myfont = pygame.font.SysFont('Arial', 18)
-            textsurface = myfont.render('Out of movements.', False, (0, 0, 0))
-            gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
-        if not self.broken:
-            self.movements += 1
-            self.dir = (self.dir - 1 + 4) % 4
-            for _ in range(30):
-                generate_map()
-                self.set_position(self.x,self.y,self.w - 3)
+        self.dir = (self.dir - 1 + 4) % 4
+        for _ in range(30):
+            generate_map()
+            self.set_position(self.x,self.y,self.w - 3)
 
     def rotate_left(self):
-        if self.movements >= 300:
-            self.broken = True
-            myfont = pygame.font.SysFont('Arial', 18)
-            textsurface = myfont.render('Out of movements.', False, (0, 0, 0))
-            gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
-        if not self.broken:
-            self.movements += 1
-            self.dir = (self.dir + 1) % 4
-            for _ in range(30):
-                generate_map()
-                self.set_position(self.x,self.y,self.w + 3)
+        self.dir = (self.dir + 1) % 4
+        for _ in range(30):
+            generate_map()
+            self.set_position(self.x,self.y,self.w + 3)
 
     def distanciaFrente(self):
         return self.__getDistance(0)

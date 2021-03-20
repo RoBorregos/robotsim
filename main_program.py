@@ -12,19 +12,49 @@ Sensors:
 
 def main():
     ############################################
-    #Test movimiento
+    # Escribir todo el código dentro de main
+    # Respuesta de actividad en testFiles/tests.py
     ############################################
     def moverAdelante():
-        return 0
+        robot.izqAdelante(1)
+        robot.izqAtras(0)
+        robot.derAdelante(1)
+        robot.derAtras(0)
+        robot.prenderMotor()
+
 
     def moverAtras():
-        return 0
+        robot.izqAdelante(0)
+        robot.izqAtras(1)
+        robot.derAdelante(0)
+        robot.derAtras(1)
+        robot.prenderMotor()
 
     def girarIzq():
-        return 0
+        robot.izqAdelante(0)
+        robot.izqAtras(1)
+        robot.derAdelante(1)
+        robot.derAtras(0)
+        robot.prenderMotor()
 
     def girarDer():
-        return 0
+        robot.izqAdelante(1)
+        robot.izqAtras(0)
+        robot.derAdelante(0)
+        robot.derAtras(1)
+        robot.prenderMotor()
+
+    while(True):
+        girarDer()
+        if(robot.distanciaFrente() > 0):
+            moverAdelante()
+        else:
+            girarIzq()
+            if(robot.distanciaFrente() > 0):
+                moverAdelante()
+            else:
+                girarIzq()
+    
 
 
 if __name__ == "__main__":

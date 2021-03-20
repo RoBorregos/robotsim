@@ -1,23 +1,22 @@
-Última actualización: 24/10/2020
+Última actualización: 19/03/2021
 
 ![](resources/logo.png)
 
 ##
-# **robotSim**
+# **robotSim** (Taller)
 
-_ **robotSim** _ es un proyecto en desarrollo, así que le pedimos a los participantes de Candidates 2020 que estén atentos a cualquier aviso de actualización del programa. Igualmente, si hay cualquier duda no duden en contactarse con los programadores RoBorregos:
+_ **robotSim** _ es un proyecto en desarrollo; cualquier duda no duden en contactarse con los programadores RoBorregos:
 
 | Nombre | Correo | Github |
 | ---- | ----- | ------ |
-| José Cisneros | [A01283070@itesm.mx](mailto:A01283070@itesm.mx) | [@Josecisneros001](https://github.com/Josecisneros001) |
-| Keven Arroyo | [A01283678@itesm.mx](mailto:A01283678@itesm.mx) | [@dake3601](https://github.com/dake3601) |
-| Aurora Tijerina | [A01196690@itesm.mx](mailto:A01196690@itesm.mx) | [@AuroTB](https://github.com/AuroTB) |
+| Aurora Tijerina | [auro.tj@gmail.com](mailto:auro.tj@gmail.com) | [@AuroTB](https://github.com/AuroTB) |
 
 
 ### Acerca de este proyecto
 
-El simulador fue adaptado específicamente para los retos de Candidates 2020. En esta versión, se tiene un entorno específico para el [Hack de Programación de Robótica 2020](https://drive.google.com/file/d/1B0jB0Iq4SKzmIq1SzM4XoDQHxFvHWOdm/view?usp=sharing).
+El simulador fue adaptado para el taller *Diseño de un sistema robótico*. En esta versión, se tiene un entorno específico para enseñar cómo programar el control de 2 motores para realizar movimientos básicos (adelante, atrás, giro izquierda y giro derecha).
 
+Se puede ver la grabación del taller [aquí](https://fb.watch/4kSc98p-Yg/).
 
 ### Uso del simulador
 
@@ -42,15 +41,21 @@ El simulador fue adaptado específicamente para los retos de Candidates 2020. En
 	$ cd robotSim
 	```
 
-3. Instalar dependencias del simulador.
+3. Cambia la la branch de *tallerRobotica*.
+
+	```bash
+	$ git checkout tallerRobotica
+	```
+
+4. Instalar dependencias del simulador.
 	
 	```bash
 	$ pip install -r requirements.txt
 	```
 
-3. Codificar movimientos del robot en main\_program.py
+5. Codificar movimientos del robot dentro del main\_program.py
 
-4. Simular Programa 
+6. Simular Programa 
 	```bash
 	$ python robotsim.py
 	```
@@ -83,35 +88,22 @@ El mapa cuenta con las siguientes características:
 
 - Dimensiones de 8x8
 - Paredes alrededor de todo el perímetro a recorrer
-- Líneas negras: Edificios/estructuras urbanas
-- Zonas rojas: Personas
-- Zonas cyan: Safe zones
-- Zonas rosas: Zona de derrumbe/peligro
-- Zona amarilla: Incendio
-- Contadores:
-	- Movimientos
-	- Puntos (de acuerdo a la rúbrica descrita en la descripción del Hack de programación)
+- Líneas negras: paredes
 
-Cabe recalcar que el robot **siempre** empezará en la base de bomberos (coordenada 0,0) viendo hacia el **ESTE** (derecha) de acuerdo a la rosa de los vientos.
-
+Se puede cambiar la apariencia del mapa modificando el documento en *resources/map.json*
 
 ### Funciones del robot
 
+![](resources/tableTruth.png)
+
 | **Función** | **Descripción** | **Input/Output** |
 | --- | --- | --- |
-| robot.move\_forward() | Mueve el robot a la baldosa de enfrente | - |
-| robot.rotate\_right() | Gira el robot 90° a la derecha | - |
-| robot.rotate\_left() | Gira el robot 90° a la izquierda | - |
-| robot.ultrasonicFront() | Obtiene la distancia (número de cuadrantes libres) frente al robot | Output: int |
-| robot.ultrasonicRight() | Obtiene la distancia (número de cuadrantes libres) a la derecha del robot | Output: int |
-| robot.ultrasonicLeft() | Obtiene la distancia (número de cuadrantes libres) a la izquierda del robot | Output: int |
-| robot.detectFireFront() | Regresa si la baldosa enfrente del robot tiene o no fuego. | Output: bool |
-| robot.scanEnvironment() | Regresa el tipo de ambiente en el que se encuentra el robot: "fire", "people", "collapse", "clear", "safe" | Output: string |
-| robot.putOutFireFront() | Apaga el fuego en la baldosa que está enfrente del robot. | - |
-| robot.sendMessageExplorationBase(Coord) | Envía coordenadas a la base de rescate | Input: obj Coord <br/>Output: bool |
-| robot.sendMessageRescueBase(Coord, path) | Envía coordenadas a la base de rescate y (opcionalmente) un path a una zona segura. El path debe tener la forma de una lista de caracteres hacia las direcciones de acuerdo a la rosa de los vientos: <br/>-N: Norte (North) <br/>-S: Sur (South) <br/>-E: Este (East) <br/>-W: Oeste (west) <br/>Ejemplo: <br/>[‘N’, ‘E’, ‘S’, ‘S’, ‘W’] | Input: obj Coord, (opcional) lista de direcciones a seguir <br/>Output: true |
-| robot.finishExploration() | Termina la simulación. Si se realiza esta función sobre la coordenada 0,0 el robot habrá regresado a la base y se agregan 20 puntos al contador. | Output: simulación termina. |
-
+| robot.izqAdelante(0/1) | Gira la llanta izquierda del robot hacia enfrente | - |
+| robot.izqAtras(0/1) | Gira la llanta izquierda del robot hacia atrás | - |
+| robot.derAdelante(0/1) | Gira la llanta derecha del robot hacia enfrente | - |
+| robot.derAtras(0/1) | Gira la llanta derecha del robot hacia enfrente | - |
+| robot.prenderMotor() | Hace que se muevan los motores con la polaridad especificada por las funciones anteriores | - |
+| robot.ultrasonicFront() | Obtiene la distancia (número de cuadrantes libres) al frente del robot | Output: int |
 
 ### Importante
 
@@ -123,4 +115,4 @@ Cuando se escriba código en main\_program.py se tienen que tomar en cuenta los 
 
 Con suerte, esto se puede solucionar en el futuro, pero por el momento se debe de realizar así para evitar que el programa tenga errores.
 
-Si se identifica cualquier bug por favor manden mensaje a los organizadores de Candiates 2020.
+Si se identifica cualquier bug por favor manden mensaje a los programadores.
