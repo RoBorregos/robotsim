@@ -1,4 +1,4 @@
-Última actualización: 9/10/2020
+Última actualización: 24/10/2020
 
 #
 
@@ -18,9 +18,12 @@ _ **robotSim** _ es un proyecto en desarrollo, así que le pedimos a los partici
 
 ### Acerca de este proyecto
 
-El simulador fue adaptado específicamente para los retos de Candidates 2020. En esta versión, se tiene un entorno específico para el Mini Reto del [Mapa de Tesoro](https://drive.google.com/file/d/1Nu97Dv9UkiNyiNj_5eJC0MZKXQhEu2Bb/view?usp=sharing).
+El simulador fue adaptado específicamente para los retos de Candidates 2020. En esta versión, se tiene un entorno específico para el [Hack de Programación de Robótica 2020](https://drive.google.com/file/d/1B0jB0Iq4SKzmIq1SzM4XoDQHxFvHWOdm/view?usp=sharing).
+
 
 ### Uso del simulador
+
+#### Correr programa localmente
 
 1. Clonar el repositorio del proyecto.
 
@@ -53,7 +56,13 @@ El simulador fue adaptado específicamente para los retos de Candidates 2020. En
 	```bash
 	$ python robotsim.py
 	```
-    
+#### Correr online en Repl.it
+
+1. Entrar a https://repl.it/languages/pygame
+2. Copiar todos los archivos del repositorio en el env
+3. Poner comando en terminal: python robotsim.py 
+
+
 ### Información Archivos 
 El repositorio tiene los siguientes archivos en un folder:
 
@@ -67,17 +76,25 @@ Para correr el programa, símplemente se debe de correr el comando:
 	$ python robotsim.py
 ```
 
+
 ### Mapa
 
 ![](resources/map.png)
 
 El mapa cuenta con las siguientes características:
 
-- Negro: Pared sin símbolo.
-- Rojo: Pared con símbolo 0.
-- Azul: Pared con símbolo 1.
-- Magenta: Puerta.
-- Verde y Amarillo: Baldosas
+- Dimensiones de 8x8
+- Paredes alrededor de todo el perímetro a recorrer
+- Líneas negras: Edificios/estructuras urbanas
+- Zonas rojas: Personas
+- Zonas cyan: Safe zones
+- Zonas rosas: Zona de derrumbe/peligro
+- Zona amarilla: Incendio
+- Contadores:
+	- Movimientos
+	- Puntos (de acuerdo a la rúbrica descrita en la descripción del Hack de programación)
+
+Cabe recalcar que el robot **siempre** empezará en la base de bomberos (coordenada 0,0) viendo hacia el **ESTE** (derecha) de acuerdo a la rosa de los vientos.
 
 
 ### Funciones del robot
@@ -87,26 +104,16 @@ El mapa cuenta con las siguientes características:
 | robot.move\_forward() | Mueve el robot a la baldosa de enfrente | - |
 | robot.rotate\_right() | Gira el robot 90° a la derecha | - |
 | robot.rotate\_left() | Gira el robot 90° a la izquierda | - |
-| robot.insertCode(password) | Inserta un código en la puerta que tenga frente a éste. | Input: string (3 símbolos  Output: bool |
-| robot.ultrasonicFront() | Obtiene la distancia frente al robot en centímetros; si no detecta nada regresa -1 | Output: int |
-| robot.getColor() | Obtiene el color de la baldosa en la que el robot se encuentra | Output: string ('green','yellow','white) |
-| robot.detectSimbolLeft() | Detecta el símbolo a la izquierda | Output: '0'/'1'/None |
-| robot.detectSimbolRight() | Detecta el símbolo a la derecha | Output: '0'/'1'/None |
-| robot.detectDoorFront() | Detecta si frente al robot hay una puerta | Output: bool |
-| robot.getHuffmanTree() | Te regresa el nodo raíz (root) del árbol de Huffman | Output: Nodo |
+| robot.ultrasonicFront() | Obtiene la distancia (número de cuadrantes libres) frente al robot | Output: int |
+| robot.ultrasonicRight() | Obtiene la distancia (número de cuadrantes libres) a la derecha del robot | Output: int |
+| robot.ultrasonicLeft() | Obtiene la distancia (número de cuadrantes libres) a la izquierda del robot | Output: int |
+| robot.detectFireFront() | Regresa si la baldosa enfrente del robot tiene o no fuego. | Output: bool |
+| robot.scanEnvironment() | Regresa el tipo de ambiente en el que se encuentra el robot: "fire", "people", "collapse", "clear", "safe" | Output: string |
+| robot.putOutFireFront() | Apaga el fuego en la baldosa que está enfrente del robot. | - |
+| robot.sendMessageExplorationBase(Coord) | Envía coordenadas a la base de rescate | Input: obj Coord <br/>Output: bool |
+| robot.sendMessageRescueBase(Coord, path) | Envía coordenadas a la base de rescate y (opcionalmente) un path a una zona segura. El path debe tener la forma de una lista de caracteres hacia las direcciones de acuerdo a la rosa de los vientos: <br/>-N: Norte (North) <br/>-S: Sur (South) <br/>-E: Este (East) <br/>-W: Oeste (west) <br/>Ejemplo: <br/>[‘N’, ‘E’, ‘S’, ‘S’, ‘W’] | Input: obj Coord, (opcional) lista de direcciones a seguir <br/>Output: true |
+| robot.finishExploration() | Termina la simulación. Si se realiza esta función sobre la coordenada 0,0 el robot habrá regresado a la base y se agregan 20 puntos al contador. | Output: simulación termina. |
 
-### Árbol de Huffman
-El método getHuffmanTree() del robot regresa el nodo raíz del árbol de Huffman.
-El nodo tiene la siguiente clase:
-```bash
-class Node:  
-    def __init__(self, freq,data):  
-        self.freq = freq  
-        self.data = data  
-        self.left = None  
-        self.right = None  
-``` 
-Para más información consultar: https://www.hackerrank.com/challenges/tree-huffman-decoding/problem 
 
 ### Importante
 
