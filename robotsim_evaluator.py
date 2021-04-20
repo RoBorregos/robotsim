@@ -34,18 +34,11 @@ gameDisplay = None
 robot = None
 map = None
 
-pygame.init()
-robotImg = pygame.image.load('images/robot.png')
-run_button = pygame.image.load('images/run.png')
-rosa_de_los_vientos = pygame.image.load('images/direcciones.png')
-pygame.display.set_caption('Robot simulator')
-clock = pygame.time.Clock()
-
 crashed = False
 reset = False
 start = True
 
-with open('resources/map.json') as json_file:
+with open('resources/default.json') as json_file:
     map_info = json.load(json_file)
 
 
@@ -69,18 +62,7 @@ class Robot:
         self.x = x
         self.y = y
         self.w = w
-        box = [pygame.math.Vector2(p) for p in [(0, 0), (self.size, 0), (self.size, -self.size), (0, -self.size)]]
-        box_rotate = [p.rotate(self.w) for p in box]
-        min_box = (min(box_rotate, key=lambda p: p[0])[0], min(box_rotate, key=lambda p: p[1])[1])
-        max_box = (max(box_rotate, key=lambda p: p[0])[0], max(box_rotate, key=lambda p: p[1])[1])
-        pivot = pygame.math.Vector2(self.size//2, -self.size//2)
-        pivot_rotate = pivot.rotate(self.w)
-        pivot_move = pivot_rotate - pivot
-        origin = (self.x - self.size//2 + min_box[0] - pivot_move[0], self.y - self.size//2 - max_box[1] + pivot_move[1])
-        rotated_image = pygame.transform.rotate(robotImg, self.w)
-        gameDisplay.blit(rotated_image, origin)
-        pygame.display.update()
-        clock.tick(120)
+        print('Position:', y, x, w)
 
     def move_forward(self):
         # Map dir:
@@ -88,13 +70,12 @@ class Robot:
         #   1 -> West
         #   2 -> South
         #   3 -> East
-        if self.movements >= 300:
+        if self.movements >= 300 and not self.broken:
             self.broken = True
-            myfont = pygame.font.SysFont('Arial', 18)
-            textsurface = myfont.render('Out of movements', False, (0, 0, 0))
-            gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
+            print('---------------->Out of movements')
         if not self.broken:
             self.movements += 1
+            print('Moving forward, total movements:', self.movements)
             if self.ultrasonicFront():
                 if self.dir == 0:
                     self.row -= 1
@@ -104,57 +85,37 @@ class Robot:
                     self.row += 1
                 if self.dir == 3:
                     self.col += 1
-                for _ in range(pixel_constant):
-                    angle = self.w
-                    x1 = self.x 
-                    y1 = self.y 
-                    rad = math.radians(angle)
-                    x2 = round(math.cos(rad)) + x1
-                    y2 = y1 - round(math.sin(rad))
-                    generate_map()
-                    self.set_position(x2,y2,angle)
+                self.set_position(self.col,self.row,self.w)
                 if map.tiles[self.row][self.col].envType == "fire":
                     #finish
                     self.broken = True
-                    gameDisplay.fill(white)
-                    myfont = pygame.font.SysFont('Arial', 12)
-                    textsurface = myfont.render("Robot eliminated by fire!", False, (0, 0, 0))
-                    gameDisplay.blit(textsurface,(display_width/2-pixel_constant*1.2,0))
+                    print('---------------->Robot eliminated by fire!')
                 if map.tiles[self.row][self.col].envType == "collapse":
                     if map.tiles[self.row][self.col].envData:
                         #finish
                         self.broken = True
-                        gameDisplay.fill(white)
-                        myfont = pygame.font.SysFont('Arial', 12)
-                        textsurface = myfont.render("Robot stuck in collapsed zone!", False, (0, 0, 0))
-                        gameDisplay.blit(textsurface,(display_width/2-pixel_constant*1.2,0))
+                        print('---------------->Robot stuck in collapsed zone!')
                     map.tiles[self.row][self.col].envData = 1
     
     def rotate_right(self):
-        if self.movements >= 300:
+        if self.movements >= 300 and not self.broken:
             self.broken = True
-            myfont = pygame.font.SysFont('Arial', 18)
-            textsurface = myfont.render('Out of movements.', False, (0, 0, 0))
-            gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
+            print('---------------->Out of movements')
         if not self.broken:
             self.movements += 1
+            print('Rotating right, total movements:', self.movements)
             self.dir = (self.dir - 1 + 4) % 4
-            for _ in range(30):
-                generate_map()
-                self.set_position(self.x,self.y,self.w - 3)
+            self.set_position(self.x,self.y,(self.w - 90)%360)
 
     def rotate_left(self):
-        if self.movements >= 300:
+        if self.movements >= 300 and not self.broken:
             self.broken = True
-            myfont = pygame.font.SysFont('Arial', 18)
-            textsurface = myfont.render('Out of movements.', False, (0, 0, 0))
-            gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
+            print('---------------->Out of movements')
         if not self.broken:
             self.movements += 1
+            print('Rotating left, total movements:', self.movements)
             self.dir = (self.dir + 1) % 4
-            for _ in range(30):
-                generate_map()
-                self.set_position(self.x,self.y,self.w + 3)
+            self.set_position(self.x,self.y,(self.w + 90)%360)
 
     def ultrasonicFront(self):
         return self.__getDistance(0)
@@ -178,11 +139,9 @@ class Robot:
         dirs = [[0, 1, 2, 3],
                 [3, 0, 1, 2],
                 [1, 2, 3, 0]]
-
         distance = None
         start = 0
         distance_direction = dirs[dir_ultrasonic][self.dir]
-
         if distance_direction == 0:
             # row-- until 0
             for pos in range(self.row, -1, -1):
@@ -192,7 +151,6 @@ class Robot:
                 start += 1
             if distance == None:
                 return -1 
-            
         if distance_direction == 1:
             # col-- until 0 
             for pos in range(self.col, -1, -1):
@@ -202,7 +160,6 @@ class Robot:
                 start += 1
             if distance == None:
                 return -1 
-
         if distance_direction == 2:
             # row++ until max
             for pos in range(self.row, map.height):
@@ -212,7 +169,6 @@ class Robot:
                 start += 1
             if distance == None:
                 return -1
-
         if distance_direction == 3:
             # col++ until 0
             for pos in range(self.col, map.width):
@@ -221,9 +177,7 @@ class Robot:
                     break
                 start += 1
             if distance == None:
-                return -1 
-        pygame.display.update()
-        clock.tick(120)
+                return -1
         return distance
 
     def scanEnvironment(self):
@@ -258,8 +212,9 @@ class Robot:
                 return
             map.tiles[row][col].color = "white"
             map.tiles[row][col].envType = "clear"
-            generate_map()
+            # generate_map()
             self.points += 10
+            print('Fire extinguished! +10,', "Total points:", self.points)
         
     def sendMessageRescueBase(self, coordinate, path = None):
         row = coordinate.y
@@ -267,17 +222,18 @@ class Robot:
         if map.is_valid_coordinate(row, col) and map.tiles[row][col].envType == "people":
             map.tiles[row][col].envType = "clear"
             map.tiles[row][col].color = "white"
-            generate_map()
             self.points += 5
+            print('Rescue message with correct data sent! +5,', "Total points:", self.points)
             if path:
                 if self.__verifyPath(path):
                     self.points += 20
-                    print("Valid path")
+                    print('Valid path! +20,', "Total points:", self.points)
                 else:
-                    print("Invalid path")
                     self.points -= 20
+                    print('Invalid path! -20,', "Total points:", self.points)
             return True
         self.points -= 10
+        print('Rescue message with incorrect data sent! -10,', "Total points:", self.points)
         return False
 
     def sendMessageExplorationBase(self, coordinate):
@@ -285,8 +241,10 @@ class Robot:
         col = coordinate.x
         if map.is_valid_coordinate(row, col) and map.tiles[row][col].envType == "collapse":
             self.points += 5
+            print('Exploration message with correct data sent! +5,', "Total points:", self.points)
             return True
         self.points -= 10
+        print('Exploration message with incorrect data sent! -10,', "Total points:", self.points)
         return False
 
     def __verifyPath(self,path): # path : ['N', 'S', 'E', 'W'...]
@@ -307,13 +265,12 @@ class Robot:
         return False
 
     def finishExploration(self):
-        self.broken = True
-        if self.col + self.row == 0:
-            print("El robot regresó a la base con éxito.")
-            self.points+=20
-        myfont = pygame.font.SysFont('Arial', 18)
-        textsurface = myfont.render('Mission finished!', False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*4))
+        if not self.broken:
+            self.broken = True
+            if self.col + self.row == 0:
+                self.points+=20
+                print("Robot returned to base successfully! +20 points," , "Total points:", self.points)
+            print('Mission finished.')
 
     def __debugTile(self):
         print("(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)")
@@ -340,63 +297,6 @@ class Robot:
         print("West: ", map.tiles[row][col].West.status)
         print("(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)")
 
-    
-
-def generate_map():
-    global rosa_de_los_vientos
-    gameDisplay.fill(white)
-
-    for row in range(map.height):
-        for col in range(map.width):
-            #Tile color
-            if map.tiles[row][col].color:
-                x = col * pixel_constant
-                y = row * pixel_constant
-                c = colors[map.tiles[row][col].color]
-                pygame.draw.rect(gameDisplay,c,(x,y,pixel_constant,pixel_constant))
-
-            #Tile walls in North, South, East and West order
-            x1 = [0, 0, 1, 0]
-            y1 = [0, 1, 0, 0]
-            x2 = [1, 1, 1, 0]
-            y2 = [0, 1, 1, 1]
-            dir = ["North","South","East","West"]
-            #Wall shifting towards the center
-            shift_x = [0, 0, -1, 1]
-            shift_y = [1, -1, 0, 0]
-            for wall_order in range(4):
-                direction_status = getattr(getattr(map.tiles[row][col], dir[wall_order]),"status")
-                if direction_status  != 0 :
-                    x1_pixel = (col + x1[wall_order]) * pixel_constant + shift_x[wall_order] * pixel_constant * 0.02
-                    x2_pixel = (col + x2[wall_order]) * pixel_constant + shift_x[wall_order] * pixel_constant * 0.02
-                    y1_pixel = (row + y1[wall_order]) * pixel_constant + shift_y[wall_order] * pixel_constant * 0.02
-                    y2_pixel = (row + y2[wall_order]) * pixel_constant + shift_y[wall_order] * pixel_constant * 0.02
-                    color = "black"
-                    # if isinstance(color, list):
-                    #     direction_data = getattr(getattr(map.tiles[row][col], dir[wall_order]),"data")
-                    #     if direction_data is None:
-                    #         color = color[-1]
-                    #     else:
-                    #         color = color[int(direction_data)]
-                    pygame.draw.line(gameDisplay, colors[color], (x1_pixel, y1_pixel), (x2_pixel, y2_pixel),5)
-    
-    rosa_de_los_vientos = pygame.transform.scale(rosa_de_los_vientos, (int(pixel_constant*2), int(pixel_constant*2)))
-    gameDisplay.blit(rosa_de_los_vientos, (pixel_constant*8 + pixel_constant*0.2, pixel_constant))
-        
-    if robot:
-        myfont = pygame.font.SysFont('Arial', 12)
-        textsurface = myfont.render('Movements = ' + str(robot.movements), False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*0.2))
-        textsurface = myfont.render('Points = ' + str(robot.points), False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, 0.4*pixel_constant))
-        
-    else:
-        myfont = pygame.font.SysFont('Arial', 12)
-        textsurface = myfont.render('Movements = 0', False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, pixel_constant*0.2))
-        textsurface = myfont.render('Points = 0', False, (0, 0, 0))
-        gameDisplay.blit(textsurface,(pixel_constant*8 + pixel_constant*0.2, 0.4*pixel_constant))
-
 
 def setup_map():
     global display_width 
@@ -408,8 +308,6 @@ def setup_map():
     pixel_constant = map_info['squareSize'] if map_info['squareSize'] else pixel_constant
     display_width = map_info['size']['w'] * pixel_constant
     display_height = map_info['size']['h'] * pixel_constant
-
-    gameDisplay = pygame.display.set_mode((display_width + int(pixel_constant*2.5), display_height))
 
     #Map initialization
     map = Map(map_info['size']['w'],map_info['size']['h'])
@@ -429,7 +327,6 @@ def setup_map():
                 new_col = tile['col'] + dir_reflection_xy[dir_index][1]
                 if map.is_valid_coordinate(new_row, new_col):
                     setattr(getattr(map.tiles[new_row][new_col], dir_reflection[dir_index]), "status", 1)
-    generate_map()
 
 
 def setup_robot():
@@ -442,9 +339,6 @@ def setup_robot():
     global robotImg
 
     robot_size = int(pixel_constant * 0.5)
-    robotImg = pygame.transform.scale(robotImg, (robot_size, robot_size))
-    gameIcon = pygame.image.load('images/roborregos_logo.PNG')
-    pygame.display.set_icon(gameIcon)
     
     col = map_info['robot_start']['col']
     row = map_info['robot_start']['row']
@@ -459,38 +353,20 @@ def setup_robot():
 
 
 def main():
+    global robot
     setup_map()
     setup_robot()
     with open("main_program.py") as f:
         code = compile(f.read(), "main_program.py", 'exec')
         exec(code)
+    print("(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)")
+    print('Final score:', robot.points)
+    print('Movements:', robot.movements)
+    print("(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)")
 
 
 if __name__ == "__main__":
-
-    while not crashed:
-        if start:
-            setup_map()
-            setup_robot()
-            start = False
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                crashed = True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                if pos[0] < pixel_constant * 0.5 and pos[1] < pixel_constant * 0.5:
-                    if not reset:
-                        reset = True
-                
-        if reset:
-            main()
-            reset = False
-        else:
-            run_button = pygame.transform.scale(run_button, (int(pixel_constant*0.5), int(pixel_constant*0.5)))
-            gameDisplay.blit(run_button, (0, 0))
-            pygame.display.update()
-            clock.tick(120)
-
-    pygame.quit()
+    setup_map()
+    setup_robot()
+    main()
     quit()

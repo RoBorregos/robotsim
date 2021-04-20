@@ -94,7 +94,8 @@ El mapa cuenta con las siguientes características:
 	- Movimientos
 	- Puntos (de acuerdo a la rúbrica descrita en la descripción del Hack de programación)
 
-Cabe recalcar que el robot **siempre** empezará en la base de bomberos (coordenada 0,0) viendo hacia el **ESTE** (derecha) de acuerdo a la rosa de los vientos.
+Cabe recalcar que el robot **siempre** empezará en la base de bomberos (coordenada 0,0) viendo hacia el **ESTE** (derecha) de acuerdo a la rosa de los vientos.  
+Igualmente, después de 300 movimientos el programa se terminará.
 
 
 ### Funciones del robot
@@ -110,7 +111,7 @@ Cabe recalcar que el robot **siempre** empezará en la base de bomberos (coorden
 | robot.detectFireFront() | Regresa si la baldosa enfrente del robot tiene o no fuego. | Output: bool |
 | robot.scanEnvironment() | Regresa el tipo de ambiente en el que se encuentra el robot: "fire", "people", "collapse", "clear", "safe" | Output: string |
 | robot.putOutFireFront() | Apaga el fuego en la baldosa que está enfrente del robot. | - |
-| robot.sendMessageExplorationBase(Coord) | Envía coordenadas a la base de rescate | Input: obj Coord <br/>Output: bool |
+| robot.sendMessageExplorationBase(Coord) | Envía coordenadas a la base de exploración | Input: obj Coord <br/>Output: bool |
 | robot.sendMessageRescueBase(Coord, path) | Envía coordenadas a la base de rescate y (opcionalmente) un path a una zona segura. El path debe tener la forma de una lista de caracteres hacia las direcciones de acuerdo a la rosa de los vientos: <br/>-N: Norte (North) <br/>-S: Sur (South) <br/>-E: Este (East) <br/>-W: Oeste (west) <br/>Ejemplo: <br/>[‘N’, ‘E’, ‘S’, ‘S’, ‘W’] | Input: obj Coord, (opcional) lista de direcciones a seguir <br/>Output: true |
 | robot.finishExploration() | Termina la simulación. Si se realiza esta función sobre la coordenada 0,0 el robot habrá regresado a la base y se agregan 20 puntos al contador. | Output: simulación termina. |
 
