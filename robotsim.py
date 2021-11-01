@@ -67,8 +67,6 @@ class Robot:
         self.movements = 0
         self.logic_calls = 0
         self.points = 0
-        self.xEnd = 0
-        self.yEnd = 0
         self.missing_color = 'white'
         self.white = False
         self.finished = False
@@ -453,7 +451,9 @@ def setup_map() -> None:
             color_diff.add(game_map.tiles[j][i].color)
             color_count[game_map.tiles[j][i].color] += 1
         for key, val in color_count.items():
-            exit_col += val == 3
+            if val >= 3:
+                exit_col += 1
+                break
         color_diff.discard('white')
         exit_col += len(color_diff) == 6
 
@@ -464,10 +464,11 @@ def setup_map() -> None:
             color_diff.add(game_map.tiles[j][i].color)
             color_count[game_map.tiles[j][i].color] += 1
         for key, val in color_count.items():
-            exit_row += val == 3
+            if val >= 3:
+                exit_row += 2
+                break
         color_diff.discard('white')
-        exit_row += len(color_diff) == 6
-
+        exit_row += (len(color_diff) == 6) * 2
     generate_map()
     return
 
@@ -521,7 +522,18 @@ def main() -> None:
 if __name__ == "__main__":
     if EVAL_MODE:
         print('Round start')
-        main()
+        try:
+            main()
+        except Exception as e:
+            print("Error:", e)
+            print("Program crashes")
+        if EVAL_MODE:
+            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            print('Eval Results')
+            print("Total points: ", robot.points)
+            print("Total movements: ", robot.movements)
+            print("Total logic calls: ", robot.logic_calls)
+            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('Round end')
 
     while not crashed:

@@ -409,7 +409,7 @@
         {
             "row": 6,
             "col": 0,
-            "color": "yellow",
+            "color": "blue",
             "directions": [
                 0,
                 0,
@@ -442,7 +442,7 @@
         {
             "row": 6,
             "col": 3,
-            "color": "yellow",
+            "color": "blue",
             "directions": [
                 0,
                 0,
@@ -475,7 +475,7 @@
         {
             "row": 7,
             "col": 0,
-            "color": "blue",
+            "color": "yellow",
             "directions": [
                 0,
                 0,
@@ -508,7 +508,7 @@
         {
             "row": 7,
             "col": 3,
-            "color": "blue",
+            "color": "yellow",
             "directions": [
                 1,
                 0,
@@ -538,9 +538,5 @@
                 0
             ]
         }
-    ],
-    "finish_tile": {
-        "row": 2,
-        "col": 2
-    }
+    ]
 }
